@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package array.adt;
 
 import java.util.ArrayList;
@@ -12,16 +7,25 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- *
- * @author crist
+ * This static class serves as a helper for the various sorting methods implemented.
+ * @author v8002382
  */
 public class ArraySort {
     public static int count = 0;
     
+    /**
+     * Optimized quicksort using three pivots.
+     * @param a The array to sort.
+     * @param left The initial starting index.
+     * @param right The initial final index.
+     */
     static public void optimized3QuickSort(int[] a, int left, int right)
     {
         if(left < right)
         {
+            
+            // An initial swap of one element is performed to avoid worst case scenarios.
+            // If the array is sorted after the swap, we avoid having to run the sort again.
             for (int i = left; i < right; i++) 
             {
                 if (a[i] > a[i + 1]) 
@@ -41,6 +45,8 @@ public class ArraySort {
             {
                 return;
             }
+            
+            // If the array is too small, we make use of insertion sort as it is more efficient.
             if(right - left <= 27)
             {
                 insertionSort(a,left,right);               
@@ -55,6 +61,14 @@ public class ArraySort {
             }
         }
     }
+    
+    /**
+     * Pick three random pivots and swap them to the right places before performing the partitioning.
+     * @param a Array to sort.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing the final picked pivots.
+     */
     static private int[] random3Partition(int[] a, int left, int right)
     {
         int randomNum = ThreadLocalRandom.current().nextInt(left, right + 1);
@@ -82,6 +96,14 @@ public class ArraySort {
         }
         return basic3PivotPartition(a,left,right);
     }
+    
+    /**
+     * Performs the partition, swapping the elements between the three pivots previously randomized.
+     * @param A Array to sort.
+     * @param left Left-limit of the partition.
+     * @param right right Right-limit of the partition.
+     * @return An array containing the final pivot indices after partitioning.
+     */
      static private int[] basic3PivotPartition(int[] A, int left, int right)
     {
         int p = A[left];
@@ -141,14 +163,22 @@ public class ArraySort {
         pivots[2] = d;
         return pivots;
     }
+     
+     /**
+      * Performs an optimized dual-pivot quicksort.
+      * @param a The array to be sorted.
+      * @param left First index of the array.
+      * @param right Last index of the array.
+      */
     static public void optimizedQuickSort(int[] a, int left, int right)
     {
         if(left < right)
         {
+            
+            // If the array is too small, we make use of insertion sort as it is more efficient.
             if(right - left <= 27)
             {
                 insertionSort(a,left,right);
-                return;
             }
             else
             {
@@ -159,28 +189,51 @@ public class ArraySort {
             }
         }
     }
+    
+    /**
+     * Performs an optimized standard quicksort.
+     * @param a The array to be sorted.
+     * @param left First index of the array.
+     * @param right Last index of the array.
+     */
     static public void quickSort(int[] a, int left, int right)
     {
         if(left < right)
         {
             if(right - left <= 27)
             {
+                // If the array is too small, we make use of insertion sort as it is more efficient.
                 insertionSort(a,left,right);
             }
             else {
-            int pi = randomPartition(a,left,right);
-            quickSort(a,left,pi-1);
-            quickSort(a,pi+1,right);
+                int pi = randomPartition(a,left,right);
+                quickSort(a,left,pi-1);
+                quickSort(a,pi+1,right);
             }
         }
     }
     
+    /**
+     * Picks a random index to perform partitioning. 
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return Index of the pivot after partitioning.
+     */
     static private int randomPartition(int[] a, int left, int right)
     {
         int randomNum = ThreadLocalRandom.current().nextInt(left, right + 1);
         swap(a,randomNum,right);
         return partition(a,left,right);
     }
+    
+    /**
+     * Picks random indices to perform partitioning. 
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing indices of the pivots after partitioning.
+     */
     static private int[] randomDualPartition(int[] a, int left, int right)
     {
         int randomNum = ThreadLocalRandom.current().nextInt(left, right + 1);
@@ -192,6 +245,13 @@ public class ArraySort {
         return dualPivotPartition(a,left,right);
     }
     
+    /**
+     * Performs partitioning for a standard quicksort.
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return Index of the pivot after partitioning.
+     */
     static private int partition(int[] a, int left, int right)
     {
         int pivot = a[right];
@@ -208,6 +268,14 @@ public class ArraySort {
         swap(a,i+1,right);
         return i+1;
     }
+    
+    /**
+     * Performs partitioning for a dual-pivot quicksort.
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing indices of the pivots after partitioning.
+     */
     static private int[] dualPivotPartition(int[] a, int left, int right)
     {
         int[] pivots = new int[2];
@@ -236,23 +304,49 @@ public class ArraySort {
         pivots[1] = great+1;
         return pivots;
     }
+    
+    /**
+     * Performs a parallel merge sort on the array.
+     * @param a Array to sort.
+     * @param l Starting index.
+     * @param r Final index.
+     */
     static public void parallelMergeSort(int[] a, int l, int r)
     {
         final ForkJoinPool forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
         forkJoinPool.invoke(new ParallelMergeSort(a, l, r));
     }
     
+    /**
+     * Performs a parallel dual-pivot quicksort on the given array.
+     * @param a Array to sort.
+     * @param l Starting index.
+     * @param r Final index.
+     */
     static public void hyperQuickSort(int[] a, int l, int r)
     {
         final ForkJoinPool forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
         forkJoinPool.invoke(new ParallelQuickSort(a, l, r));
     }
+    
+    /**
+     * Performs a dual-pivot parallel quicksort on the given array.
+     * @param a Array to sort.
+     * @param l Starting index.
+     * @param r Final index.
+     */
     static public void experimentalHyperQuickSort(int[] a, int l, int r)
     {
         final ForkJoinPool forkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
         forkJoinPool.invoke(new ParallelMultiQuickSort(a, l, r));
     }
     
+    /**
+     * Performs a mergesort on the given array.
+     * @param a Array to sort.
+     * @param l Starting index.
+     * @param r Final index.
+     */
     static public void mergeSort(int[] a, int l, int r)
     {
         if(l < r)
@@ -264,6 +358,13 @@ public class ArraySort {
         }
     }
     
+    /**
+     * Merges the two sides split.
+     * @param a Array to sort.
+     * @param l Left-limit index.
+     * @param m Middle split index.
+     * @param r Right-limit index.
+     */
     static private void merge(int[] a, int l, int m, int r)
     {
         int n1 = m - l + 1;
@@ -304,6 +405,13 @@ public class ArraySort {
             j++;
         }
     }
+    
+    /**
+     * Performs insertion-sort on the array.
+     * @param arr Array to be sorted.
+     * @param left Starting index.
+     * @param right Final index.
+     */
     static public void insertionSort(int[] arr, int left, int right) 
     { 
         for (int i=left+1; i<=right; i++) 
@@ -318,6 +426,12 @@ public class ArraySort {
             arr[j+1] = key; 
         } 
     } 
+    
+    /**
+     * Performs Weirdsort on the array.
+     * @param data Array to sort.
+     * @param currentSize Size of the array.
+     */
     public static void weirdSort(int[] data, int currentSize)
     {
         for(int i = 1; i < currentSize; i++)
@@ -336,6 +450,13 @@ public class ArraySort {
             }
         }
     }
+    
+    /**
+     * Performs bubble sort on the array.
+     * @param data Array to sort.
+     * @param currentSize Size of the array.
+     * @param asc Whether to sort in ascending order or not
+     */
     public static void bubbleSort(int[] data, int currentSize, boolean asc)
     {
         int ok, n = currentSize;
@@ -373,6 +494,12 @@ public class ArraySort {
             }while(ok==1);
         }
     }
+    
+    /**
+     * Performs Cocktailsort on the array.
+     * @param array Array to sort.
+     * @param currentSize Size of the array.
+     */
     public static void cocktailShaker(int[] array, int currentSize) {
         boolean swapped;
         do {
@@ -395,6 +522,12 @@ public class ArraySort {
             }
         } while (swapped == false);
     }
+    
+    /**
+     * Performs Shuttlesort on the array.
+     * @param a Array to sort.
+     * @param n Size of the array.
+     */
     public static void shuttlesort(int[] a, int n) 
     {
         int temp, j;
@@ -414,6 +547,12 @@ public class ArraySort {
             }		
         }	
     }
+    
+    /**
+     * Performs Selection sort on the array.
+     * @param a Array to sort.
+     * @param n Size of the array.
+     */
     public static void selectionSort(int[] a, int n)
     {
         for(int i = 0; i < n-1; i++)
@@ -425,6 +564,14 @@ public class ArraySort {
             swap(a,i,mindex);
         }
     }
+    
+    /**
+     * Performs bucketsort on the array.
+     * @param a Array to sort.
+     * @param max Max size of the buckets.
+     * @param min Min size of the buckets.
+     * @param n Size of the array.
+     */
     public static void bucketSort(int[] a, int max, int min, int n)
     {
         int M = max - min;
@@ -455,6 +602,13 @@ public class ArraySort {
             }
         }
     }
+    
+    /**
+     * Swap two elements in an array.
+     * @param a Array to swap elements in.
+     * @param i Index of the first element.
+     * @param j Index of the second element.
+     */
     static private void swap(int[] a, int i, int j)
     {
         int x;

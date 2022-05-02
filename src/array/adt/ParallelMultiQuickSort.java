@@ -1,27 +1,33 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package array.adt;
 import static java.util.concurrent.ForkJoinTask.invokeAll;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- *
- * @author crist
+ * This recursive action class serves to perform the three-pivot parallel quicksort using ForkJoinPool.
+ * @author v8002382
  */
 public class ParallelMultiQuickSort extends RecursiveAction{
     final int[] array;
     final int lo, hi;
     static final double THRESHOLD = 1<<12;
+    
+    /**
+     * Constructor for providing starting and final indices.
+     * @param array Array to be sorted.
+     * @param lo Starting index.
+     * @param hi Final index.
+     */
     ParallelMultiQuickSort(int[] array, int lo, int hi) {
         this.array = array;
         this.lo = lo;
         this.hi = hi;
     }
 
+    /**
+     * Standard constructor.
+     * @param array Array to be sorted.
+     */
     ParallelMultiQuickSort(int[] array) {
         this(array, 0, array.length);
     }
@@ -29,8 +35,10 @@ public class ParallelMultiQuickSort extends RecursiveAction{
     @Override
     protected void compute() {
         if (lo < hi) {
+            
+            // If the sequential threshhold is hit, perform sequential quicksort for efficiency.
             if (hi - lo <= THRESHOLD) 
-            { // Sequential implementation
+            { 
                 ArraySort.optimized3QuickSort(array, lo, hi);
             } 
             else 
@@ -68,6 +76,13 @@ public class ParallelMultiQuickSort extends RecursiveAction{
         }
     }    
 
+    /**
+     * Picks random indices to perform partitioning. 
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing indices of the pivots after partitioning.
+     */
     static private int[] random3Partition(int[] a, int left, int right)
     {
         int randomNum = ThreadLocalRandom.current().nextInt(left, right + 1);
@@ -95,7 +110,15 @@ public class ParallelMultiQuickSort extends RecursiveAction{
         }
         return basic3PivotPartition(a,left,right);
     }
-     static private int[] basic3PivotPartition(int[] A, int left, int right)
+    
+    /**
+     * Performs partitioning for a dual-pivot quicksort.
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing indices of the pivots after partitioning.
+     */
+    static private int[] basic3PivotPartition(int[] A, int left, int right)
     {
         int p = A[left];
         int q = A[left+1];
@@ -154,7 +177,14 @@ public class ParallelMultiQuickSort extends RecursiveAction{
         pivots[2] = d;
         return pivots;
     }
-     static private void swap(int[] a, int i, int j)
+    
+    /**
+     * Swap two elements in an array.
+     * @param a Array to swap elements in.
+     * @param i Index of the first element.
+     * @param j Index of the second element.
+     */
+    static private void swap(int[] a, int i, int j)
     {
         int x;
         x = a[i];

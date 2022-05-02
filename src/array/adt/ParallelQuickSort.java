@@ -1,30 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package array.adt;
 
-import static array.adt.ArraySort.count;
-import static array.adt.ArraySort.optimizedQuickSort;
 import static java.util.concurrent.ForkJoinTask.invokeAll;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- *
- * @author crist
+ * This recursive action class serves to perform the dual-pivot parallel quicksort using ForkJoinPool.
+ * @author v8002382
  */
 public class ParallelQuickSort extends RecursiveAction{
     final int[] array;
     final int lo, hi;
     static final double THRESHOLD = 1<<13;
+    
+    /**
+     * Constructor for providing starting and final indices.
+     * @param array Array to be sorted.
+     * @param lo Starting index.
+     * @param hi Final index.
+     */
     ParallelQuickSort(int[] array, int lo, int hi) {
         this.array = array;
         this.lo = lo;
         this.hi = hi;
     }
 
+    /**
+     * Standard constructor.
+     * @param array Array to be sorted.
+     */
     ParallelQuickSort(int[] array) {
         this(array, 0, array.length);
     }
@@ -32,8 +36,10 @@ public class ParallelQuickSort extends RecursiveAction{
     @Override
     protected void compute() {
         if (lo < hi) {
+            
+            // If the sequential threshhold is hit, perform sequential quicksort for efficiency.
             if (hi - lo <= THRESHOLD) 
-            { // Sequential implementation
+            { 
                 ArraySort.optimizedQuickSort(array, lo, hi);
             } 
             else 
@@ -50,6 +56,13 @@ public class ParallelQuickSort extends RecursiveAction{
         }
     }    
 
+    /**
+     * Picks random indices to perform partitioning. 
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing indices of the pivots after partitioning.
+     */
     static private int[] randomDualPartition(int[] a, int left, int right)
     {
         int randomNum = ThreadLocalRandom.current().nextInt(left, right + 1);
@@ -60,7 +73,15 @@ public class ParallelQuickSort extends RecursiveAction{
         swap(a,randomNum2,left);
         return dualPivotPartition(a,left,right);
     }
-     static private int[] dualPivotPartition(int[] a, int left, int right)
+    
+    /**
+     * Performs partitioning for a dual-pivot quicksort.
+     * @param a The array to be sorted.
+     * @param left Left-limit of the partition.
+     * @param right Right-limit of the partition.
+     * @return An array containing indices of the pivots after partitioning.
+     */
+    static private int[] dualPivotPartition(int[] a, int left, int right)
     {
         int[] pivots = new int[2];
         if(a[left] > a[right])
@@ -88,7 +109,14 @@ public class ParallelQuickSort extends RecursiveAction{
         pivots[1] = great+1;
         return pivots;
     }
-     static private void swap(int[] a, int i, int j)
+    
+    /**
+     * Swap two elements in an array.
+     * @param a Array to swap elements in.
+     * @param i Index of the first element.
+     * @param j Index of the second element.
+     */
+    static private void swap(int[] a, int i, int j)
     {
         int x;
         x = a[i];
